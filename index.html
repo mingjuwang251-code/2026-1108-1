@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五年級社會互動學習單：臺灣的地理位置與全球連結</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti 慶祝特效 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            background-color: #f0fdf4;
+        }
+        .drag-item {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .drag-item:active {
+            cursor: grabbing;
+        }
+        .drop-zone {
+            transition: all 0.2s ease-in-out;
+        }
+        .drop-zone.drag-over {
+            background-color: #dcfce7;
+            border-color: #16a34a;
+            transform: scale(1.02);
+        }
+        /* 自訂美化捲軸 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #86efac;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #22c55e;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white;
+            }
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 text-slate-800">
+
+    <!-- 頂部導覽與個人資訊欄 -->
+    <header class="bg-teal-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2 rounded-xl text-2xl">
+                    🌏
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">國小五年級社會領域數字學習單</h1>
+                    <p class="text-xs text-teal-100">單元：臺灣的地理位置與全球連結</p>
+                </div>
+            </div>
+
+            <!-- 個人資料輸入區 -->
+            <div class="flex flex-wrap items-center gap-2 text-sm no-print">
+                <div class="bg-teal-800 px-3 py-1.5 rounded-lg flex items-center space-x-2">
+                    <label for="student-class" class="text-teal-200">班級:</label>
+                    <input type="text" id="student-class" placeholder="五年1班" class="bg-teal-900 text-white px-2 py-0.5 rounded w-20 focus:outline-none focus:ring-1 focus:ring-teal-300">
+                </div>
+                <div class="bg-teal-800 px-3 py-1.5 rounded-lg flex items-center space-x-2">
+                    <label for="student-name" class="text-teal-200">姓名:</label>
+                    <input type="text" id="student-name" placeholder="請輸入姓名" class="bg-teal-900 text-white px-2 py-0.5 rounded w-28 focus:outline-none focus:ring-1 focus:ring-teal-300">
+                </div>
+                <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-medium shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> 列印學習單
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 mt-6 space-y-8">
+
+        <!-- 進度與得分看板 -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 flex flex-wrap justify-between items-center gap-4 no-print">
+            <div class="flex items-center space-x-4">
+                <div class="text-emerald-600 font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-500 text-xl"></i>
+                    <span>目前得分：<span id="score-display" class="text-2xl text-emerald-700">0</span> / 100 分</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 text-sm font-medium">
+                <button onclick="checkAllAnswers()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check"></i> 提交評分
+                </button>
+                <button onclick="resetWorksheet()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> 重置
+                </button>
+            </div>
+        </div>
+
+        <!-- 📌 任務一：臺灣的秘密地址與鄰居地圖 -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6 print-card">
+            <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-teal-800 flex items-center gap-2">
+                    <span class="bg-teal-100 text-teal-800 w-8 h-8 rounded-full flex items-center justify-center text-sm font-black">1</span>
+                    📌 任務一：臺灣的秘密地址與鄰居地圖
+                </h2>
+                <span class="text-xs bg-teal-50 text-teal-700 font-semibold px-2.5 py-1 rounded-full border border-teal-200">佔分 35 分</span>
+            </div>
+
+            <!-- 小題 1：經緯度填空 -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-slate-700 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot text-rose-500"></i>
+                    1. 臺灣的絕對位置（經緯度地址填空）：
+                </h3>
+                <div class="bg-slate-50 p-4 rounded-xl space-y-3 leading-relaxed text-sm md:text-base">
+                    <p class="flex flex-wrap items-center gap-2">
+                        臺灣主要範圍大約位於：東經
+                        <select id="q1-1" class="border border-slate-300 rounded px-2 py-1 bg-white font-semibold text-teal-700 focus:ring-2 focus:ring-teal-400">
+                            <option value="">請選擇</option>
+                            <option value="118">118°</option>
+                            <option value="120">120°</option>
+                            <option value="122">122°</option>
+                        </select>
+                        至
+                        <select id="q1-2" class="border border-slate-300 rounded px-2 py-1 bg-white font-semibold text-teal-700 focus:ring-2 focus:ring-teal-400">
+                            <option value="">請選擇</option>
+                            <option value="122">122°</option>
+                            <option value="124">124°</option>
+                            <option value="126">126°</option>
+                        </select>
+                        之間，
+                    </p>
+                    <p class="flex flex-wrap items-center gap-2">
+                        北緯
+                        <select id="q1-3" class="border border-slate-300 rounded px-2 py-1 bg-white font-semibold text-teal-700 focus:ring-2 focus:ring-teal-400">
+                            <option value="">請選擇</option>
+                            <option value="20">20°</option>
+                            <option value="22">22°</option>
+                            <option value="25">25°</option>
+                        </select>
+                        至
+                        <select id="q1-4" class="border border-slate-300 rounded px-2 py-1 bg-white font-semibold text-teal-700 focus:ring-2 focus:ring-teal-400">
+                            <option value="">請選擇</option>
+                            <option value="23.5">23.5°</option>
+                            <option value="25">25°</option>
+                            <option value="28">28°</option>
+                        </select>
+                        之間。
+                    </p>
+                    <p class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200">
+                        貫穿臺灣中南部的著名重要緯線是
+                        <select id="q1-5" class="border border-slate-300 rounded px-2 py-1 bg-white font-semibold text-teal-700 focus:ring-2 focus:ring-teal-400">
+                            <option value="">請選擇線條</option>
+                            <option value="赤道">赤道</option>
+                            <option value="北回歸線">北回歸線</option>
+                            <option value="南回歸線">南回歸線</option>
+                        </select>
+                        ，緯度約為北緯
+                        <select id="q1-6" class="border border-slate-300 rounded px-2 py-1 bg-white font-semibold text-teal-700 focus:ring-2 focus:ring-teal-400">
+                            <option value="">請選擇度數</option>
+                            <option value="0">0°</option>
+                            <option value="23.5">23.5°</option>
+                            <option value="66.5">66.5°</option>
+                        </select>。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 小題 2：互動拖拽地圖鄰居卡片 -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-slate-700 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-compass text-teal-600"></i>
+                    2. 臺灣的相對位置互動地圖（請將下方名稱拖拖放置對應的方位框）：
+                </h3>
+
+                <!-- 可拖拽標籤池 -->
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-2">
+                    <span class="text-xs font-bold text-amber-800 uppercase tracking-wider block">可拖拽的名稱選單：</span>
+                    <div id="drag-items-pool" class="flex flex-wrap gap-2 min-h-[44px]">
+                        <div draggable="true" id="drag-china" data-val="中國大陸" class="drag-item bg-white text-slate-700 border border-slate-300 shadow-sm px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 hover:bg-slate-50">
+                            <i class="fa-solid fa-grip-vertical text-slate-400"></i> 中國大陸
+                        </div>
+                        <div draggable="true" id="drag-japan" data-val="日本" class="drag-item bg-white text-slate-700 border border-slate-300 shadow-sm px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 hover:bg-slate-50">
+                            <i class="fa-solid fa-grip-vertical text-slate-400"></i> 日本
+                        </div>
+                        <div draggable="true" id="drag-philippines" data-val="菲律賓" class="drag-item bg-white text-slate-700 border border-slate-300 shadow-sm px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 hover:bg-slate-50">
+                            <i class="fa-solid fa-grip-vertical text-slate-400"></i> 菲律賓
+                        </div>
+                        <div draggable="true" id="drag-pacific" data-val="太平洋" class="drag-item bg-white text-slate-700 border border-slate-300 shadow-sm px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 hover:bg-slate-50">
+                            <i class="fa-solid fa-grip-vertical text-slate-400"></i> 太平洋
+                        </div>
+                        <div draggable="true" id="drag-strait" data-val="臺灣海峽" class="drag-item bg-white text-slate-700 border border-slate-300 shadow-sm px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 hover:bg-slate-50">
+                            <i class="fa-solid fa-grip-vertical text-slate-400"></i> 臺灣海峽
+                        </div>
+                        <div draggable="true" id="drag-bashi" data-val="巴士海峽" class="drag-item bg-white text-slate-700 border border-slate-300 shadow-sm px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 hover:bg-slate-50">
+                            <i class="fa-solid fa-grip-vertical text-slate-400"></i> 巴士海峽
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 互動九宮格地圖佈局 -->
+                <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex flex-col items-center justify-center relative min-h-[360px]">
+                    
+                    <!-- 指北針示意 -->
+                    <div class="absolute top-4 right-4 bg-white/80 backdrop-blur px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-location-arrow text-rose-500 transform -rotate-45"></i> 指北 (N)
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 md:gap-4 w-full max-w-xl">
+                        <!-- NW (空) -->
+                        <div></div>
+                        <!-- 北 N (日本) -->
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs text-slate-500 font-bold mb-1">北方鄰國</span>
+                            <div id="drop-north" data-ans="日本" class="drop-zone border-2 border-dashed border-teal-300 bg-white rounded-xl w-full h-14 flex items-center justify-center text-sm font-bold text-teal-800 shadow-inner">
+                                請拖入名稱
+                            </div>
+                        </div>
+                        <!-- NE (空) -->
+                        <div></div>
+
+                        <!-- 西 W (中國大陸/臺灣海峽) -->
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <span class="text-xs text-slate-500 font-bold">西方海域/國家</span>
+                            <div id="drop-west-1" data-ans="中國大陸" class="drop-zone border-2 border-dashed border-teal-300 bg-white rounded-xl w-full h-12 flex items-center justify-center text-xs font-bold text-teal-800 shadow-inner">
+                                西方鄰陸
+                            </div>
+                            <div id="drop-west-2" data-ans="臺灣海峽" class="drop-zone border-2 border-dashed border-teal-300 bg-white rounded-xl w-full h-12 flex items-center justify-center text-xs font-bold text-teal-800 shadow-inner">
+                                西方海域
+                            </div>
+                        </div>
+
+                        <!-- 中心：臺灣地圖示意 -->
+                        <div class="bg-emerald-500 text-white rounded-2xl flex flex-col items-center justify-center p-3 shadow-md border-2 border-emerald-600 font-black text-lg">
+                            <span class="text-3xl mb-1">🏝️</span>
+                            <span>臺灣本島</span>
+                        </div>
+
+                        <!-- 東 E (太平洋) -->
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="text-xs text-slate-500 font-bold mb-1">東方大洋</span>
+                            <div id="drop-east" data-ans="太平洋" class="drop-zone border-2 border-dashed border-teal-300 bg-white rounded-xl w-full h-20 flex items-center justify-center text-sm font-bold text-teal-800 shadow-inner">
+                                請拖入海域
+                            </div>
+                        </div>
+
+                        <!-- SW (空) -->
+                        <div></div>
+                        <!-- 南 S (巴士海峽/菲律賓) -->
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <span class="text-xs text-slate-500 font-bold">南方海域/鄰國</span>
+                            <div id="drop-south-1" data-ans="巴士海峽" class="drop-zone border-2 border-dashed border-teal-300 bg-white rounded-xl w-full h-12 flex items-center justify-center text-xs font-bold text-teal-800 shadow-inner">
+                                南方海域
+                            </div>
+                            <div id="drop-south-2" data-ans="菲律賓" class="drop-zone border-2 border-dashed border-teal-300 bg-white rounded-xl w-full h-12 flex items-center justify-center text-xs font-bold text-teal-800 shadow-inner">
+                                南方鄰國
+                            </div>
+                        </div>
+                        <!-- SE (空) -->
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 📌 任務二：海航大亨的航線分析 -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6 print-card">
+            <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-teal-800 flex items-center gap-2">
+                    <span class="bg-teal-100 text-teal-800 w-8 h-8 rounded-full flex items-center justify-center text-sm font-black">2</span>
+                    📌 任務二：海航大亨的航線分析
+                </h2>
+                <span class="text-xs bg-teal-50 text-teal-700 font-semibold px-2.5 py-1 rounded-full border border-teal-200">佔分 30 分</span>
+            </div>
+
+            <!-- 黑潮與洋流概念 -->
+            <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 flex items-start gap-3">
+                <div class="text-2xl text-sky-600">🌊</div>
+                <div class="text-sm space-y-2 text-sky-900">
+                    <h4 class="font-bold">洋流知識小講堂：</h4>
+                    <p>由南向北流經臺灣東部海域的溫暖洋流稱為<strong>「黑潮」</strong>。黑潮流速快、水溫高，不僅帶來豐沛的漁業資源，古今船隻更常利用黑潮順流北上以節省航行時間與燃料。</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label for="q2-1" class="font-bold text-slate-700 text-sm md:text-base block">
+                        1. 順著由南向北流經臺灣東部的溫暖洋流叫做什麼？它為臺灣帶來了什麼資源？
+                    </label>
+                    <div class="flex flex-wrap gap-2 items-center text-sm">
+                        洋流名稱：
+                        <input type="text" id="q2-1" placeholder="填寫洋流名稱" class="border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-teal-400 focus:outline-none w-36">
+                        ，帶來豐沛的
+                        <select id="q2-2" class="border border-slate-300 rounded-lg px-3 py-1.5 bg-white font-medium text-teal-700 focus:ring-2 focus:ring-teal-400">
+                            <option value="">選擇資源類型</option>
+                            <option value="石油">石油</option>
+                            <option value="漁業">漁業</option>
+                            <option value="礦產">礦產</option>
+                        </select>
+                        資源與航行動力。
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <label class="font-bold text-slate-700 text-sm md:text-base block">
+                        2. 觀察臺灣周邊海域航線，臺灣海峽是連接哪兩個區域的重要海上通道？
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <span class="font-semibold text-slate-600">北方重要區域：</span>
+                            <select id="q2-3" class="mt-1 border border-slate-300 rounded-lg px-3 py-1.5 bg-white w-full font-medium text-teal-700 focus:ring-2 focus:ring-teal-400">
+                                <option value="">請選擇</option>
+                                <option value="東北亞">東北亞 (如：日本、韓國)</option>
+                                <option value="歐洲">歐洲</option>
+                                <option value="北美洲">北美洲</option>
+                            </select>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <span class="font-semibold text-slate-600">南方重要區域：</span>
+                            <select id="q2-4" class="mt-1 border border-slate-300 rounded-lg px-3 py-1.5 bg-white w-full font-medium text-teal-700 focus:ring-2 focus:ring-teal-400">
+                                <option value="">請選擇</option>
+                                <option value="東南亞">東南亞 (如：新加坡、越南)</option>
+                                <option value="南美洲">南美洲</option>
+                                <option value="非洲">非洲</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 開放思考題 -->
+                <div class="space-y-2 pt-2">
+                    <label for="q2-5" class="font-bold text-slate-700 text-sm md:text-base block">
+                        3. 💡 思考題：如果貨櫃船不走臺灣海峽，改繞道繞行太平洋外側，會帶來什麼影響？（可複選觀點）
+                    </label>
+                    <div class="space-y-2 text-sm bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="q2-5" value="A" class="w-4 h-4 text-teal-600 rounded">
+                            <span>航行距離變長，燃料與時間成本大幅增加</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="q2-5" value="B" class="w-4 h-4 text-teal-600 rounded">
+                            <span>全球商品運費可能會變貴，物價上漲</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="q2-5" value="C" class="w-4 h-4 text-teal-600 rounded">
+                            <span>完全沒有任何影響，時間一樣快</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 📌 任務三：我的全球化生活軌跡 -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6 print-card">
+            <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-teal-800 flex items-center gap-2">
+                    <span class="bg-teal-100 text-teal-800 w-8 h-8 rounded-full flex items-center justify-center text-sm font-black">3</span>
+                    📌 任務三：我的全球化生活軌跡與世界公民宣言
+                </h2>
+                <span class="text-xs bg-teal-50 text-teal-700 font-semibold px-2.5 py-1 rounded-full border border-teal-200">佔分 35 分</span>
+            </div>
+
+            <!-- 互動進口物品對對碰卡片 -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-slate-700 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-packing text-amber-600"></i>
+                    1. 生活進口物品與主要運輸方式配對：
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- 物品一 -->
+                    <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-4 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🥝</span>
+                            <div>
+                                <h4 class="font-bold text-amber-900">紐西蘭奇異果</h4>
+                                <p class="text-xs text-amber-700">產地：紐西蘭</p>
+                            </div>
+                        </div>
+                        <div class="text-sm space-y-1">
+                            <label class="block text-slate-600 font-medium">適合的國際運輸方式：</label>
+                            <select id="q3-1" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 bg-white text-teal-800 font-semibold focus:ring-2 focus:ring-teal-400">
+                                <option value="">請選擇運輸方式</option>
+                                <option value="海運冷藏貨櫃船">🚢 海運冷藏貨櫃船 (大批量、保鮮)</option>
+                                <option value="個人騎機車">🛵 個人騎機車跨海</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 物品二 -->
+                    <div class="bg-sky-50/60 border border-sky-200 rounded-xl p-4 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🌸</span>
+                            <div>
+                                <h4 class="font-bold text-sky-900">荷蘭新鮮鬱金香花卉</h4>
+                                <p class="text-xs text-sky-700">產地：荷蘭（具時效性高價商品）</p>
+                            </div>
+                        </div>
+                        <div class="text-sm space-y-1">
+                            <label class="block text-slate-600 font-medium">適合的國際運輸方式：</label>
+                            <select id="q3-2" class="w-full border border-slate-300 rounded-lg px-3 py-1.5 bg-white text-teal-800 font-semibold focus:ring-2 focus:ring-teal-400">
+                                <option value="">請選擇運輸方式</option>
+                                <option value="空運貨機">✈️ 空運貨機 (速度快、爭取新鮮度)</option>
+                                <option value="慢速步行">🚶 慢速步行</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 世界公民宣言簡答 -->
+            <div class="space-y-4 pt-2">
+                <h3 class="font-bold text-slate-700 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-earth-asia text-emerald-600"></i>
+                    2. 寫下你的「世界公民短評與宣言」：
+                </h3>
+                <div class="bg-emerald-50/50 border border-emerald-200 p-4 rounded-xl space-y-3">
+                    <p class="text-sm text-emerald-900 font-medium leading-relaxed">
+                        學習完這個單元後，我發現臺灣雖然面積不龐大，但是在大洋與大陸交會的地理位置上非常
+                        <select id="q3-3" class="border border-slate-300 rounded px-2 py-1 bg-white font-bold text-emerald-700">
+                            <option value="">選擇</option>
+                            <option value="重要">重要</option>
+                            <option value="渺小無關">渺小無關</option>
+                        </select>
+                        。
+                    </p>
+                    <div class="space-y-1.5">
+                        <label for="q3-4" class="block text-sm font-bold text-emerald-900">
+                            身為生活在臺灣的世界公民，面對全球化，我覺得我可以怎麼做？（請用 20~50 字寫下心聲）
+                        </label>
+                        <textarea id="q3-4" rows="3" placeholder="例如：關心國際新聞、珍惜來自世界的資源、學習多元文化、保護我們的海洋環境..." class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 評分結果與評語快照 Modal/區塊 -->
+        <div id="result-card" class="hidden bg-gradient-to-r from-teal-800 to-emerald-800 text-white rounded-2xl p-6 shadow-xl space-y-4 no-print">
+            <div class="flex items-center justify-between border-b border-teal-600/50 pb-3">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-award text-amber-400 text-2xl"></i> 學習單成果評估報告
+                </h3>
+                <button onclick="document.getElementById('result-card').classList.add('hidden')" class="text-teal-200 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="bg-white/10 rounded-xl p-3 backdrop-blur">
+                    <span class="text-xs text-teal-200 block">總得分</span>
+                    <span id="modal-score" class="text-4xl font-black text-amber-300">0</span>
+                    <span class="text-xs text-teal-200">/ 100 分</span>
+                </div>
+                <div class="bg-white/10 rounded-xl p-3 backdrop-blur md:col-span-2 text-left flex flex-col justify-center">
+                    <span class="text-xs text-teal-200 font-bold block mb-1">教師簡評與回饋：</span>
+                    <p id="modal-feedback" class="text-sm font-medium text-teal-50">尚未完成評分。</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 腳頁 footer -->
+    <footer class="max-w-5xl mx-auto px-4 mt-8 text-center text-xs text-slate-400 no-print">
+        <p>國小五年級社會領域 108 課綱素養導向互動教學資源</p>
+    </footer>
+
+    <!-- JavaScript 邏輯控制 -->
+    <script>
+        // HTML5 Drag & Drop 邏輯
+        const dragItems = document.querySelectorAll('.drag-item');
+        const dropZones = document.querySelectorAll('.drop-zone');
+        const pool = document.getElementById('drag-items-pool');
+
+        dragItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', item.id);
+                setTimeout(() => item.classList.add('opacity-40'), 0);
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('opacity-40');
+            });
+        });
+
+        dropZones.forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                const id = e.dataTransfer.getData('text/plain');
+                const draggedEl = document.getElementById(id);
+
+                if (draggedEl) {
+                    // 如果放置區已有其他元素，將舊元素還原回對話池
+                    if (zone.children.length > 0 && !zone.textContent.includes('請拖入') && !zone.textContent.includes('海域') && !zone.textContent.includes('鄰陸') && !zone.textContent.includes('鄰國')) {
+                        const existingChild = zone.querySelector('.drag-item');
+                        if (existingChild) {
+                            pool.appendChild(existingChild);
+                        }
+                    }
+                    zone.innerHTML = '';
+                    zone.appendChild(draggedEl);
+                }
+            });
+        });
+
+        // 允許拖回選單池
+        pool.addEventListener('dragover', (e) => e.preventDefault());
+        pool.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const draggedEl = document.getElementById(id);
+            if (draggedEl) {
+                pool.appendChild(draggedEl);
+            }
+        });
+
+        // 答案驗證與自動評分系統
+        function checkAllAnswers() {
+            let score = 0;
+
+            // 任務一評分 (35分)
+            const q1_1 = document.getElementById('q1-1').value; // 120
+            const q1_2 = document.getElementById('q1-2').value; // 122
+            const q1_3 = document.getElementById('q1-3').value; // 22
+            const q1_4 = document.getElementById('q1-4').value; // 25
+            const q1_5 = document.getElementById('q1-5').value; // 北回歸線
+            const q1_6 = document.getElementById('q1-6').value; // 23.5
+
+            if (q1_1 === '120') score += 3;
+            if (q1_2 === '122') score += 3;
+            if (q1_3 === '22') score += 3;
+            if (q1_4 === '25') score += 3;
+            if (q1_5 === '北回歸線') score += 4;
+            if (q1_6 === '23.5') score += 4;
+
+            // 拖拽地圖評分 (15分, 每格 3 分)
+            const zones = [
+                { id: 'drop-north', ans: '日本' },
+                { id: 'drop-west-1', ans: '中國大陸' },
+                { id: 'drop-west-2', ans: '臺灣海峽' },
+                { id: 'drop-east', ans: '太平洋' },
+                { id: 'drop-south-1', ans: '巴士海峽' },
+                { id: 'drop-south-2', ans: '菲律賓' }
+            ];
+
+            zones.forEach(z => {
+                const el = document.getElementById(z.id);
+                const child = el.querySelector('.drag-item');
+                if (child && child.getAttribute('data-val') === z.ans) {
+                    score += 2.5; // 6 個共 15 分
+                    el.classList.add('border-emerald-500', 'bg-emerald-50');
+                } else {
+                    el.classList.remove('border-emerald-500', 'bg-emerald-50');
+                }
+            });
+
+            // 任務二評分 (30分)
+            const q2_1 = document.getElementById('q2-1').value.trim();
+            const q2_2 = document.getElementById('q2-2').value;
+            const q2_3 = document.getElementById('q2-3').value;
+            const q2_4 = document.getElementById('q2-4').value;
+
+            if (q2_1.includes('黑潮')) score += 8;
+            if (q2_2 === '漁業') score += 7;
+            if (q2_3 === '東北亞') score += 7;
+            if (q2_4 === '東南亞') score += 8;
+
+            // 任務三評分 (35分)
+            const q3_1 = document.getElementById('q3-1').value;
+            const q3_2 = document.getElementById('q3-2').value;
+            const q3_3 = document.getElementById('q3-3').value;
+            const q3_4 = document.getElementById('q3-4').value.trim();
+
+            if (q3_1.includes('海運')) score += 10;
+            if (q3_2.includes('空運')) score += 10;
+            if (q3_3 === '重要') score += 5;
+            if (q3_4.length >= 10) score += 10; // 心得有填寫給滿分
+
+            // 更新分數顯示
+            const finalScore = Math.round(score);
+            document.getElementById('score-display').textContent = finalScore;
+            document.getElementById('modal-score').textContent = finalScore;
+
+            // 動態評語
+            let feedback = '';
+            if (finalScore >= 90) {
+                feedback = '🌟 太棒了！你對於臺灣的地理位置、周邊海洋與全球連結有非常清晰而完整的理解，具備優秀的世界公民素養！';
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else if (finalScore >= 70) {
+                feedback = '👍 做得好！你掌握了大部分的地理座標與海洋航線觀念，再仔細檢查一下錯題就更完美囉！';
+            } else {
+                feedback = '💪 加油！建議再重新複習課本中關於「經緯線判讀」與「臺灣周邊海域名稱」，相信你下次會表現得更好！';
+            }
+
+            document.getElementById('modal-feedback').textContent = feedback;
+            document.getElementById('result-card').classList.remove('hidden');
+            document.getElementById('result-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 重置學習單
+        function resetWorksheet() {
+            // 清空選擇框
+            document.querySelectorAll('select').forEach(s => s.value = '');
+            document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+            document.querySelectorAll('textarea').forEach(t => t.value = '');
+            document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+
+            // 還原拖拽標籤到池中
+            const items = document.querySelectorAll('.drag-item');
+            items.forEach(item => pool.appendChild(item));
+
+            // 還原 Dropzone 預設文字
+            document.getElementById('drop-north').textContent = '請拖入名稱';
+            document.getElementById('drop-west-1').textContent = '西方鄰陸';
+            document.getElementById('drop-west-2').textContent = '西方海域';
+            document.getElementById('drop-east').textContent = '請拖入海域';
+            document.getElementById('drop-south-1').textContent = '南方海域';
+            document.getElementById('drop-south-2').textContent = '南方鄰國';
+
+            document.querySelectorAll('.drop-zone').forEach(z => {
+                z.classList.remove('border-emerald-500', 'bg-emerald-50');
+            });
+
+            // 重置分數
+            document.getElementById('score-display').textContent = '0';
+            document.getElementById('result-card').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
